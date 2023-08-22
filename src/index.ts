@@ -1,5 +1,6 @@
-
 import dotenv from 'dotenv';
+dotenv.config();
+
 import { Telegraf } from 'telegraf';
 import { BotContext } from './models/index.js';
 import { logger } from './core/index.js';
@@ -11,10 +12,9 @@ import {
     AnalyzeCommand,
     HelpCommand
 } from './commands/index.js';
+await import('./services/db/index.js');
 
-dotenv.config();
 const bot = new Telegraf<BotContext>(process.env.TELEGRAM_BOT_TOKEN as string);
-
 
 // Register middlewares
 bot.use(
