@@ -1,0 +1,25 @@
+{
+  "name": "telegram-dex-bot",
+  "version": "1.0.0",
+  "description": "Telegram DEX Bot for analysis - @dex_analysis_bot",
+  "repository": "https://github.com/happyNariman/telegram-dex-bot.git",
+  "type": "module",
+  "scripts": {
+    "start": "npm run build && npm run run",
+    "run": "node dist/index.js",
+    "build": "npx tsc",
+    "dev": "node --trace-warnings --loader ts-node/esm src/index.ts"
+  },
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^16.3.1",
+    "ethers": "^6.7.1",
+    "telegraf": "^4.12.2",
+    "winston": "^3.10.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.5.1",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.1.6"
+  }
+}

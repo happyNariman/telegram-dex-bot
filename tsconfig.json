@@ -1,0 +1,17 @@
+{
+  "extends": "./tsconfig.node20.json",
+  "compilerOptions": {
+    "module": "esnext",
+    "outDir": "./dist",
+    "baseUrl": ".",
+    "sourceMap": true,
+    "typeRoots": ["./node_modules/@types", "./src/types"],
+    "paths": {
+      "@core/*": ["src/core/*"],
+      "@middlewares/*": ["src/middlewares/*"],
+      "@commands/*": ["src/commands/*"],
+      "@models/*": ["src/models/*"]
+    }
+  },
+  "include": ["./src/**/*", "env.d.ts"]
+}
