@@ -9,6 +9,10 @@ declare module 'process' {
                 FIREBASE_PROJECT_ID: string;
                 FIREBASE_CLIENT_EMAIL: string;
                 FIREBASE_PRIVATE_KEY: string;
+
+                WALLET_PRIVATE_KEY: string;
+                INFURA_API_KEY: string;
+                ETHERSCAN_API_KEY: string;
             }
         }
     }

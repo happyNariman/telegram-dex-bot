@@ -36,7 +36,7 @@ bot.help(HelpCommand);
 
 // Start bot
 try {
-    logger.info('Starting bot...');
+    logger.info(`Starting bot... environment: ${process.env.NODE_ENV}`);
     await bot.launch();
 } catch (error) {
     logger.error(`Error starting the bot: ${error}`);
