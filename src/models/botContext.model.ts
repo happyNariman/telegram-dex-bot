@@ -1,6 +1,8 @@
+import { Logger } from "winston";
 import { Context } from "telegraf";
+import { UserDBModel } from "./user-db.model.js";
 
 export interface BotContext extends Context {
-    myProp?: string;
-    myOtherProp?: number;
+    logger: Logger;
+    user: UserDBModel;
 }

@@ -1,7 +1,7 @@
 import { createLogger, transports, format } from 'winston';
 
 const logger = createLogger({
-    level: 'info',
+    level: 'debug',
     format: format.combine(
         format.timestamp(),
         format.metadata(),
@@ -13,7 +13,7 @@ const logger = createLogger({
     transports: [
         //new transports.Console(),
         new transports.File({ filename: 'logs/error.log', level: 'error' }),
-        new transports.File({ filename: 'logs/bot.log' }),
+        new transports.File({ filename: 'logs/bot.log', level: 'debug' }),
     ]
 });
 
@@ -21,6 +21,7 @@ if (process.env.NODE_ENV !== 'production') {
     logger.add(new transports.Console({
         format: format.simple(),
     }));
+    logger.level = 'info';
 }
 
 export { logger };

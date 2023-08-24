@@ -1,11 +1,13 @@
-import { logger } from "@core/index.js";
+import firebase from 'firebase-admin';
+import { logger } from "../../core/index.js";
 import { UserDBModel } from "@models/index.js";
-import { db, usersCollectionReference } from "./firebase.service.js";
 
 export class UserDBService {
-    private collectionRef: FirebaseFirestore.CollectionReference = usersCollectionReference;
+    private readonly collectionRef: FirebaseFirestore.CollectionReference;
 
-    constructor() { }
+    constructor() {
+        this.collectionRef = firebase.firestore().collection('users');
+    }
 
     // async create(data: Omit<UserDBModel, 'id'>): Promise<string | null> {
     //     try {
