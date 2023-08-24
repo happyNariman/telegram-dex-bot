@@ -7,7 +7,8 @@ const logger = createLogger({
         format.metadata(),
         format.printf(({ level, message, metadata }) => {
             const metaString = metadata && Object.keys(metadata).length > 1 ? `\n${JSON.stringify(metadata, null, 2)}` : '';
-            return `${metadata?.timestamp} ${level}: ${message}${metaString}`;
+            const requestIdStr = metadata.requestId ? ` [${metadata.requestId}]` : '';
+            return `[${metadata?.timestamp}] [${level}]${requestIdStr}: ${message}${metaString}`;
         })
     ),
     transports: [

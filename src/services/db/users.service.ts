@@ -1,11 +1,11 @@
+import { Logger } from 'winston';
 import firebase from 'firebase-admin';
-import { logger } from "../../core/index.js";
 import { UserDBModel } from "@models/index.js";
 
 export class UserDBService {
     private readonly collectionRef: FirebaseFirestore.CollectionReference;
 
-    constructor() {
+    constructor(private logger: Logger) {
         this.collectionRef = firebase.firestore().collection('users');
     }
 
@@ -23,7 +23,7 @@ export class UserDBService {
         try {
             await this.collectionRef.doc(id).set(data);
         } catch (error) {
-            logger.error('Error creating User document:', { error, id, data });
+            this.logger.error('Error creating User document:', { error, id, data });
             throw error;
         }
     }
@@ -40,7 +40,7 @@ export class UserDBService {
 
             return users;
         } catch (error) {
-            logger.error('Error reading User documents:', error);
+            this.logger.error('Error reading User documents:', error);
             return [];
         }
     }
@@ -55,7 +55,7 @@ export class UserDBService {
                 return null;
             }
         } catch (error) {
-            logger.error('Error getting User document:', { error, id });
+            this.logger.error('Error getting User document:', { error, id });
             return null;
         }
     }
@@ -65,8 +65,8 @@ export class UserDBService {
             await this.collectionRef.doc(id).update(data);
             return true;
         } catch (error) {
-            logger.error('Error updating User document:', { error, id, data });
-            return false;
+            this.logger.error('Error updating User document:', { error, id, data });
+            throw error;
         }
     }
 
@@ -75,8 +75,8 @@ export class UserDBService {
             await this.collectionRef.doc(id).delete();
             return true;
         } catch (error) {
-            logger.error('Error deleting User document:', { error, id });
-            return false;
+            this.logger.error('Error deleting User document:', { error, id });
+            throw error;
         }
     }
 }

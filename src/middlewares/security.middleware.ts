@@ -5,6 +5,7 @@ import { UserDBService } from '../services/index.js';
 export async function SecurityMiddleware(context: BotContext, next: () => Promise<void>) {
     let telegramUser: User | undefined;
     let message: Message.TextMessage | undefined;
+    let callbackQuery: CallbackQuery.DataQuery | undefined;
 
     switch (context.updateType) {
         case 'message':
@@ -13,7 +14,7 @@ export async function SecurityMiddleware(context: BotContext, next: () => Promis
             break;
 
         case 'callback_query':
-            const callbackQuery = (context.update as Update.CallbackQueryUpdate).callback_query as CallbackQuery;
+            callbackQuery = (context.update as Update.CallbackQueryUpdate).callback_query as CallbackQuery.DataQuery;
             telegramUser = callbackQuery.from;
             break;
     }
@@ -32,9 +33,10 @@ export async function SecurityMiddleware(context: BotContext, next: () => Promis
 
     context.sendChatAction('typing');
 
-    const userDBService = new UserDBService();
+    const userDBService = new UserDBService(context.logger);
     let user = await userDBService.getById(telegramUser.id.toString());
-    const isAllowedStartCommand = message && (message.text.startsWith('/start') || message.text.startsWith('/help'));
+    const messageText = message?.text || '';
+    const isAllowedStartCommand = messageText.startsWith('/start') || messageText.startsWith('/help');
 
     if (user) {
         context.user = user;
@@ -44,6 +46,12 @@ export async function SecurityMiddleware(context: BotContext, next: () => Promis
                 context.reply('You need to choose a role: /user or /analyst\nDetails: /help');
                 return;
             }
+        } else if (messageText.startsWith('/start')) {
+            context.reply('You are already registered.\nTry to analyze the wallet in this format "/analyze <wallet address> eth"');
+            return;
+        } else if (callbackQuery?.data?.startsWith('set_role')) {
+            context.reply(`You already have the ${user.role} role installed.`);
+            return;
         }
     } else if (!isAllowedStartCommand) {
         context.reply('Access is denied. Start from the /start');

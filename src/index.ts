@@ -7,11 +7,10 @@ import { logger } from './core/index.js';
 import { LoggingMiddleware, SecurityMiddleware, ErrorMiddleware } from './middlewares/index.js';
 import {
     StartCommand,
-    StartUserRoleCommand,
-    StartAnalystRoleCommand,
     AnalyzeCommand,
     HelpCommand
 } from './commands/index.js';
+import { SetRoleUserAction, SetRoleAnalystAction } from './actions/index.js';
 import { initFirebase } from './services/db/index.js';
 
 initFirebase();
@@ -28,10 +27,13 @@ bot.catch(ErrorMiddleware);
 
 // Register commands
 bot.start(StartCommand);
-bot.command('user', StartUserRoleCommand);
-bot.command('analyst', StartAnalystRoleCommand);
 bot.command('analyze', AnalyzeCommand);
 bot.help(HelpCommand);
+
+
+// Register actions
+bot.action('set_role_user', SetRoleUserAction);
+bot.action('set_role_analyst', SetRoleAnalystAction);
 
 
 // Start bot
