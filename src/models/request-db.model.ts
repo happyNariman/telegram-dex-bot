@@ -1,3 +1,7 @@
+import { Timestamp } from 'firebase-admin/firestore';
+
 export interface RequestDBModel {
-    user_id: string; // telegram user id
+    timestamp: Timestamp;
+    walletAddress: string;
+    tokenName: string;
 }

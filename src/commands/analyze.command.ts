@@ -1,40 +1,43 @@
-import { Message, Telegram } from 'typegram';
-import { BotContext } from "@models/index.js";
+import { Message } from 'typegram';
+import { Update } from 'telegraf/types';
+import { ethers } from 'ethers';
+import firebase from 'firebase-admin';
+import { BotContext, UserRole } from '../models/index.js';
+import { RequestDBService } from '../services/index.js';
 
 export async function AnalyzeCommand(context: BotContext) {
-    if (!context.from || !context.from.id) {
-        throw new Error("Invalid context");
-    }
+    if (context.updateType !== 'message')
+        throw new Error('Invalid type');
 
-    //if (context.message?.type !== 'text') return next()
+    const user = context.user;
+    const allowedRequestCounts = user.role === UserRole.Analyst ? 20 : 5;
+    const messageUpdate = context.update as Update.MessageUpdate;
+    const message = messageUpdate.message as Message.TextMessage;
+    const requestDBService = new RequestDBService(context.logger);
 
-    const users: any = {};
-    const userId = context.from.id;
-    const user = users[userId];
+    const requestCounts = await requestDBService.getCountUserRequestsByDate(context.user.id, new Date());
 
-    if (!user) {
-        context.reply("Выберите роль: /user или /analyst");
+    if (requestCounts >= allowedRequestCounts) {
+        context.reply('You have reached the request limit for today.');
         return;
     }
 
-    if (user.requestsLeft <= 0) {
-        context.reply("Вы исчерпали лимит запросов на сегодня.");
-        return;
-    }
-
-    //const msg = context.message instanceof TextMessage ? context.message : undefined;
-    console.log('AnalyzeCommand', context.message);
-
-    const args = (context.message as any).text?.split(' ') ?? [];
-    if (args.length !== 3 || args[2] !== 'eth') {
-        context.reply("Используйте формат: /analyze <адрес кошелька> eth");
+    const args = message.text?.split(' ') ?? [];
+    if (args.length !== 3 || !ethers.isAddress(args[1]) || args[2] !== 'eth') {
+        context.reply('Use the format: /analyze <wallet address> eth');
         return;
     }
 
     const walletAddress = args[1];
-    // Здесь выполняйте запросы к блокчейну через ethers.js и анализируйте торги пользователя
-    // Создание Excel документа и отправка его пользователю
+    const tokenName = args[2];
 
-    user.requestsLeft -= 1;
-    context.reply("Выполнен анализ. Осталось запросов: " + user.requestsLeft);
+
+
+    await requestDBService.create(context.user.id, {
+        timestamp: firebase.firestore.Timestamp.fromDate(new Date()),
+        walletAddress: walletAddress,
+        tokenName: tokenName
+    });
+
+    context.reply('Analysis completed. Remaining requests: ' + (allowedRequestCounts - (requestCounts + 1)));
 }

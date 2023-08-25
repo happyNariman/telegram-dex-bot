@@ -1,6 +1,6 @@
 import { Logger } from 'winston';
 import firebase from 'firebase-admin';
-import { UserDBModel } from "@models/index.js";
+import { UserDBModel } from '@models/index.js';
 
 export class UserDBService {
     private readonly collectionRef: FirebaseFirestore.CollectionReference;

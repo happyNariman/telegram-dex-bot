@@ -10,8 +10,8 @@ export class UniswapService {
 
     constructor() {
         if (process.env.NODE_ENV === 'production') {
-            this.uniswapV2RouterAddress = '***';
-            this.uniswapV3RouterAddress = '***';
+            this.uniswapV2RouterAddress = '0x7a250d5630b4cf539739df2c5dacb4c659f2488d';
+            this.uniswapV3RouterAddress = '0x3fc91a3afd70395cd496c647d5a6cc9d4b2b7fad';
         } else {
             this.uniswapV2RouterAddress = '0x86dcd3293c53cf8efd7303b57beb2a3f671dde98';
             this.uniswapV3RouterAddress = '0x3fc91a3afd70395cd496c647d5a6cc9d4b2b7fad';
