@@ -57,7 +57,7 @@ export async function AnalyzeCommand(context: BotContext) {
 }
 
 async function collectData(context: BotContext, walletAddress: string, tokenName: string): Promise<string[][]> {
-    const transactions = await new UniswapService(context.logger).getTransactions(walletAddress);
+    const transactions = await new UniswapService(context.logger).analyzeTransactions(walletAddress);
     const data: string[][] = [];
 
     for (const tx of transactions) {
