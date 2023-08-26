@@ -3,7 +3,7 @@ import { Update } from 'telegraf/types';
 import { ethers } from 'ethers';
 import firebase from 'firebase-admin';
 import { BotContext, UserRole } from '../models/index.js';
-import { ExcelService, RequestDBService } from '../services/index.js';
+import { ExcelService, RequestDBService, UniswapService } from '../services/index.js';
 
 export async function AnalyzeCommand(context: BotContext) {
     if (context.updateType !== 'message')
@@ -29,15 +29,14 @@ export async function AnalyzeCommand(context: BotContext) {
         return;
     }
 
+    context.reply('Analysis started. Please wait excel file...');
+    context.sendChatAction('upload_document');
+
     const walletAddress = args[1];
     const tokenName = args[2];
 
     try {
-        //const data: string[][] = [];
-        const data = [
-            ['BTC', '0x123abc', 'ETH', '0x456def', '2023-08-25', '0x789ghi', 'Uniswap'],
-            ['ETH', '0x456def', 'BTC', '0x123abc', '2023-08-26', '0x789ghi', 'Sushiswap']
-        ];
+        const data: string[][] = await collectData(context, walletAddress, tokenName);
         const currentDateWithoutTime = getCurrentDateWithoutTime();
         const worksheetTitle = 'Analysis as of ' + currentDateWithoutTime;
 
@@ -55,8 +54,35 @@ export async function AnalyzeCommand(context: BotContext) {
         context.reply('error ');
         context.logger.error('error', { error });
     }
+}
 
+async function collectData(context: BotContext, walletAddress: string, tokenName: string): Promise<string[][]> {
+    const transactions = await new UniswapService(context.logger).getTransactions(walletAddress);
+    const data: string[][] = [];
 
+    for (const tx of transactions) {
+        const uniswapV2RouterAddress = '***';
+        const dexType = 'Uniswap';
+
+        const coinATicker = 'ETH';
+        const coinAContract = tx.from;
+        const coinBTicker = 'USDT';
+        const coinBContract = tx.to;
+        const transactionDate = new Date(parseInt(tx.timeStamp) * 1000).toISOString();
+        const poolContract = uniswapV2RouterAddress;
+
+        data.push([
+            coinATicker,
+            coinAContract,
+            coinBTicker,
+            coinBContract,
+            transactionDate,
+            poolContract,
+            dexType,
+        ]);
+    }
+
+    return data;
 }
 
 const excelTitleColumns = [
@@ -68,7 +94,7 @@ const excelTitleColumns = [
     'Pool contract address for this pair',
     'Dex type'
 ];
-const headersWidths = [{ width: 15 }, { width: 30 }, { width: 15 }, { width: 30 }, { width: 25 }, { width: 30 }, { width: 15 }];
+const headersWidths = [{ width: 15 }, { width: 50 }, { width: 15 }, { width: 50 }, { width: 25 }, { width: 50 }, { width: 15 }];
 
 function getCurrentDateWithoutTime(): string {
     const currentDate = new Date();

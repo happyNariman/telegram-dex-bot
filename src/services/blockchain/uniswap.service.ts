@@ -1,37 +1,39 @@
-import { ethers } from 'ethers';
-
-import { logger } from '../../core/logger.js';
+import { Logger } from 'winston';
 import { EthersService } from './ethers.service.js';
+import { EtherscanTransactionModel } from '@models/index.js';
 
 export class UniswapService {
-    private ethersService: EthersService;
-    private uniswapV2RouterAddress: string;
-    private uniswapV3RouterAddress: string;
+    static readonly V3_ROUTER_ADDRESS = '0x3fc91a3afd70395cd496c647d5a6cc9d4b2b7fad';
+    static readonly V2_ROUTER_ADDRESS = '0x7a250d5630b4cf539739df2c5dacb4c659f2488d';
 
-    constructor() {
+    private ethersService: EthersService;
+    private allowedAdresses: string[] = [
+        UniswapService.V3_ROUTER_ADDRESS,
+        UniswapService.V2_ROUTER_ADDRESS
+    ];
+
+    constructor(private logger: Logger) {
         if (process.env.NODE_ENV === 'production') {
-            this.uniswapV2RouterAddress = '0x7a250d5630b4cf539739df2c5dacb4c659f2488d';
-            this.uniswapV3RouterAddress = '0x3fc91a3afd70395cd496c647d5a6cc9d4b2b7fad';
+
         } else {
-            this.uniswapV2RouterAddress = '0x86dcd3293c53cf8efd7303b57beb2a3f671dde98';
-            this.uniswapV3RouterAddress = '0x3fc91a3afd70395cd496c647d5a6cc9d4b2b7fad';
+            this.allowedAdresses.push('0x86dcd3293c53cf8efd7303b57beb2a3f671dde98'); // sepolia uniswapV2Router
         }
 
-        this.ethersService = new EthersService();
+        this.ethersService = new EthersService(logger);
     }
 
-    async getTransactions(walletAddress: string): Promise<ethers.TransactionResponse[]> {
+    async getTransactions(walletAddress: string): Promise<EtherscanTransactionModel[]> {
         try {
             const transactions = await this.ethersService.getHistory(walletAddress);
 
             const dexTrades = transactions.filter(transaction =>
-                [this.uniswapV3RouterAddress, this.uniswapV2RouterAddress].some(routerAddress =>
+                this.allowedAdresses.some(routerAddress =>
                     transaction.to == routerAddress || transaction.from == routerAddress)
             );
 
-            return transactions;
+            return dexTrades;
         } catch (error: any) {
-            logger.error('Error fetching transactions: ', { error, walletAddress });
+            this.logger.error('Error fetching transactions: ', { error, walletAddress });
             throw new Error('Error fetching transactions: ' + error?.message ?? error);
         }
     }
