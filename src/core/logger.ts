@@ -6,7 +6,7 @@ const logger = createLogger({
         format.timestamp(),
         format.metadata(),
         format.printf(({ level, message, metadata }) => {
-            const metaString = metadata && Object.keys(metadata).length > 1 ? `\n${JSON.stringify(metadata, null, 2)}` : '';
+            const metaString = metadata && Object.keys(metadata).length > 1 ? `\n${JSON.stringify(metadata, replacer, 2)}` : '';
             const requestIdStr = metadata.requestId ? ` [${metadata.requestId}]` : '';
             return `[${metadata?.timestamp}] [${level}]${requestIdStr}: ${message}${metaString}`;
         })
@@ -26,3 +26,17 @@ if (process.env.NODE_ENV !== 'production') {
 }
 
 export { logger };
+
+function replacer(key: string, value: any): any {
+    if (typeof value === 'bigint') {
+        return { '__bigintval__': value.toString() };
+    }
+    return value;
+}
+
+function reviver(key: string, value: any): any {
+    if (value != null && typeof value === 'object' && '__bigintval__' in value) {
+        return BigInt(value['__bigintval__']);
+    }
+    return value;
+}

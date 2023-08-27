@@ -1,6 +1,12 @@
 import axios from 'axios';
 import { Logger } from 'winston';
-import { EtherscanTransactionResponse, EtherscanTransactionModel, EtherscanTokenTransactionModel, EtherscanTransactionBaseModel } from '@models/index.js';
+import {
+    EtherscanTransactionResponse,
+    EtherscanTransactionModel,
+    EtherscanTokenTransactionModel,
+    EtherscanTransactionBaseModel,
+    EtherscanTransactionType
+} from '../../models/index.js';
 
 export class EtherscanService {
 
@@ -18,11 +24,18 @@ export class EtherscanService {
         if (!params || !params.address)
             throw new Error('Address must be provided.');
 
-        const result = await this._loadTransactions<EtherscanTransactionModel>({
+        const loadParams = {
             action: 'txlist',
             module: 'account',
             address: params.address
-        });
+        };
+        const result = await this._loadTransactions<EtherscanTransactionModel>(loadParams,
+            (tx: any, index, array) => {
+                tx.transactionType = EtherscanTransactionType.Transaction;
+                tx.timeStamp = new Date(parseInt(tx.timeStamp) * 1000);
+                tx.value = BigInt(tx.value);
+                return tx;
+            });
 
         return result;
     }
@@ -31,19 +44,30 @@ export class EtherscanService {
         if (!params || (!params.address && !params.contractaddress))
             throw new Error('At least one of \'address\' or \'contractaddress\' must be provided.');
 
-        const result = await this._loadTransactions<EtherscanTokenTransactionModel>({
+        const loadParams = {
             action: 'tokentx',
             module: 'account',
             address: params.address,
             contractaddress: params.contractaddress
-        });
+        };
+        const result = await this._loadTransactions<EtherscanTokenTransactionModel>(loadParams,
+            (tx: any, index, array) => {
+                tx.transactionType = EtherscanTransactionType.TokenTransaction;
+                tx.timeStamp = new Date(parseInt(tx.timeStamp) * 1000);
+                tx.tokenDecimal = Number(tx.tokenDecimal);
+                tx.value = BigInt(tx.value);
+                return tx;
+            });
 
         return result;
     }
 
     private delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
-    private async _loadTransactions<T extends EtherscanTransactionBaseModel>(params: EtherscanTransactionParameters): Promise<T[]> {
+    private async _loadTransactions<T extends EtherscanTransactionBaseModel>(
+        params: EtherscanTransactionParameters,
+        mapFn: (value: T, index: number, array: T[]) => T
+    ): Promise<T[]> {
         let allResults: T[] = [];
         params.apikey = `${process.env.ETHERSCAN_API_KEY}`;
         params.offset = 9999;
@@ -52,7 +76,7 @@ export class EtherscanService {
 
         while (true) {
             try {
-                const response = await axios.get<EtherscanTransactionResponse<T>>(this.url, {
+                const response = await axios.get<EtherscanTransactionResponse<any>>(this.url, {
                     params: params
                 });
 
@@ -62,7 +86,7 @@ export class EtherscanService {
                 if (!results || results.length === 0)
                     break;
 
-                allResults = allResults.concat(results);
+                allResults = allResults.concat(results.map(mapFn));
                 params.page++;
 
                 if (results.length < 9999)

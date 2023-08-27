@@ -4,36 +4,47 @@ export interface EtherscanTransactionResponse<Model extends EtherscanTransaction
     result?: Model[];
 }
 
+export enum EtherscanTransactionType {
+    Transaction = 'transaction',
+    InternalTransaction = 'internalTransaction',
+    TokenTransaction = 'tokenTransaction',
+    TokenNFTTransaction = 'tokenNFTTransaction',
+}
+
 export interface EtherscanTransactionBaseModel {
-    blockNumber: string;
-    timeStamp: string;
+    transactionType: EtherscanTransactionType;
+
+    blockNumber: number;
+    timeStamp: Date;
     hash: string;
-    nonce: string;
     blockHash: string;
-    transactionIndex: string;
     from: string;
     to: string;
-    value: string;
-    gas: string;
-    gasPrice: string;
-    input: string;
+    value: bigint;
     contractAddress: string;
-    cumulativeGasUsed: string;
-    gasUsed: string;
-    confirmations: string;
+    isError?: string; // from EtherscanTransactionModel
+
+    //* don't need
+    //nonce: string;
+    //transactionIndex: string;
+    //gas: string;
+    //gasPrice: string;
+    //input: string;
+    //cumulativeGasUsed: string;
+    //gasUsed: string;
+    //confirmations: string;
 }
 
 export interface EtherscanTransactionModel extends EtherscanTransactionBaseModel {
-    isError: string;
-    txreceipt_status: string;
-    methodId: string;
-    functionName: string;
+    //txreceipt_status: string;
+    //methodId: string;
+    //functionName: string;
 }
 
 export interface EtherscanTokenTransactionModel extends EtherscanTransactionBaseModel {
     tokenName: string;
     tokenSymbol: string;
-    tokenDecimal: string;
+    tokenDecimal: number;
 }
 
 export interface EtherscanInternalTransactionModel extends EtherscanTransactionBaseModel {
