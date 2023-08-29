@@ -1,8 +1,8 @@
 import dotenv from 'dotenv';
 dotenv.config();
 
-import { Telegraf } from 'telegraf';
-import { BotContext } from './models/index.js';
+import { Scenes, Telegraf, session } from 'telegraf';
+import { BotContext, BotContextWizard } from './models/index.js';
 import { logger } from './core/index.js';
 import { LoggingMiddleware, SecurityMiddleware, ErrorMiddleware } from './middlewares/index.js';
 import {
@@ -10,7 +10,7 @@ import {
     AnalyzeCommand,
     HelpCommand
 } from './commands/index.js';
-import { SetRoleUserAction, SetRoleAnalystAction } from './actions/index.js';
+import { SetRoleAction } from './actions/index.js';
 import { initFirebase } from './services/db/index.js';
 
 initFirebase();
@@ -19,8 +19,9 @@ const bot = new Telegraf<BotContext>(process.env.TELEGRAM_BOT_TOKEN as string);
 
 // Register middlewares
 bot.use(
+    session(),
     LoggingMiddleware,
-    SecurityMiddleware
+    SecurityMiddleware,
 );
 bot.catch(ErrorMiddleware);
 
@@ -32,8 +33,11 @@ bot.help(HelpCommand);
 
 
 // Register actions
-bot.action('set_role_user', SetRoleUserAction);
-bot.action('set_role_analyst', SetRoleAnalystAction);
+bot.action(/^set_role_(.*)$/, SetRoleAction);
+interface DEXTransactionsWizardSessionData extends Scenes.WizardSessionData {
+    network: string;
+    address: string;
+}
 
 
 // Start bot

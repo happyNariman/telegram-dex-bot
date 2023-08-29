@@ -6,7 +6,7 @@ export class DexAnalysisService {
     static readonly V3_ROUTER_ADDRESS = '0x3fc91a3afd70395cd496c647d5a6cc9d4b2b7fad';
     static readonly V2_ROUTER_ADDRESS = '0x7a250d5630b4cf539739df2c5dacb4c659f2488d';
     static readonly NETWORK_TOKEN_NAME = 'Ethereum';
-    static readonly NETWORK_TOKEN_SYMBOL = 'eth';
+    static readonly NETWORK_TOKEN_SYMBOL = 'ETH';
     static readonly NETWORK_TOKEN_DECIMAL = 18;
 
     private etherscanService: EtherscanService;
@@ -95,8 +95,8 @@ export class DexAnalysisService {
                 hash: collectorTransaction.hash,
                 dexType: collectorTransaction.dexType,
                 timeStamp: collectorTransaction.timeStamp,
-                fromContractAddress: collectorTransaction.from.map(p => p.contractAddress).join(', '),
-                fromSymbol: collectorTransaction.from.map(p => p.tokenSymbol).join(', '),
+                fromContractAddress: [...new Set(collectorTransaction.from.map(p => p.contractAddress))].join(', '),
+                fromSymbol: [...new Set(collectorTransaction.from.map(p => p.tokenSymbol))].join(', '),
                 toContractAddress: [...new Set(collectorTransaction.to.map(p => p.contractAddress))].join(', '),
                 toSymbol: [...new Set(collectorTransaction.to.map(p => p.tokenSymbol))].join(', '),
                 poolContractAddress: [...new Set(collectorTransaction.to.map(p => p.from))].join(', '),
