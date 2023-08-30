@@ -2,7 +2,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 import { Scenes, Telegraf, session } from 'telegraf';
-import { BotContext, BotContextWizard } from './models/index.js';
+import { BotContext } from './models/index.js';
 import { logger } from './core/index.js';
 import { LoggingMiddleware, SecurityMiddleware, ErrorMiddleware } from './middlewares/index.js';
 import {
@@ -10,8 +10,9 @@ import {
     AnalyzeCommand,
     HelpCommand
 } from './commands/index.js';
-import { SetRoleAction } from './actions/index.js';
+import { SetRoleAction, StartProductAction } from './actions/index.js';
 import { initFirebase } from './services/db/index.js';
+import { DEXTransactionsWizard } from './wizards/index.js';
 
 initFirebase();
 
@@ -26,6 +27,11 @@ bot.use(
 bot.catch(ErrorMiddleware);
 
 
+// Register wizards
+const stage = new Scenes.Stage([DEXTransactionsWizard]);
+bot.use(stage.middleware());
+
+
 // Register commands
 bot.start(StartCommand);
 bot.command('analyze', AnalyzeCommand);
@@ -34,10 +40,7 @@ bot.help(HelpCommand);
 
 // Register actions
 bot.action(/^set_role_(.*)$/, SetRoleAction);
-interface DEXTransactionsWizardSessionData extends Scenes.WizardSessionData {
-    network: string;
-    address: string;
-}
+bot.action(/^product_(.*)$/, StartProductAction);
 
 
 // Start bot

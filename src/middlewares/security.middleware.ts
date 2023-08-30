@@ -42,5 +42,8 @@ export async function SecurityMiddleware(context: BotContext, next: () => Promis
         return;
     }
 
+    if (context.updateType === 'callback_query')
+        context.editMessageReplyMarkup({ inline_keyboard: [] });
+
     return next();
 }
