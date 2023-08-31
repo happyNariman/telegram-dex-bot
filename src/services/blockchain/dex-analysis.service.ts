@@ -25,13 +25,13 @@ export class DexAnalysisService {
         this.etherscanService = new EtherscanService(logger);
     }
 
-    async analyzeTransactions(address: string): Promise<AnalysisTransactionModel[]> {
+    async analyzeTransactions(address: string, network: string): Promise<AnalysisTransactionModel[]> {
         address = address.toLowerCase();
         const result: AnalysisTransactionModel[] = [];
 
         const [tokenAllTransactions, hashMapTransactions] = await Promise.all([
-            this.etherscanService.getTokenTransactions({ address }),
-            this.etherscanService.getTransactions({ address })
+            this.etherscanService.getTokenTransactions({ address, network }),
+            this.etherscanService.getTransactions({ address, network })
                 .then(txs => txs.filter(tx =>
                     this.allowedAdresses.some(routerAddress =>
                         tx.to == routerAddress || tx.from == routerAddress)))

@@ -10,26 +10,20 @@ import {
 
 export class EtherscanService {
 
-    private url: string;
+    constructor(private logger: Logger) { }
 
-    constructor(private logger: Logger) {
-        if (process.env.NODE_ENV === 'production') {
-            this.url = 'https://api.etherscan.io/api';
-        } else {
-            this.url = 'https://api-sepolia.etherscan.io/api';
-        }
-    }
-
-    async getTransactions(params: { address: string }): Promise<EtherscanTransactionModel[]> {
+    async getTransactions(params: { network: string, address: string }): Promise<EtherscanTransactionModel[]> {
         if (!params || !params.address)
             throw new Error('Address must be provided.');
+        if (!params.network)
+            throw new Error('Network must be provided.');
 
         const loadParams = {
             action: 'txlist',
             module: 'account',
             address: params.address
         };
-        const result = await this._loadTransactions<EtherscanTransactionModel>(loadParams,
+        const result = await this._loadTransactions<EtherscanTransactionModel>(params.network, loadParams,
             (tx: any, index, array) => {
                 tx.transactionType = EtherscanTransactionType.Transaction;
                 tx.timeStamp = new Date(parseInt(tx.timeStamp) * 1000);
@@ -40,9 +34,11 @@ export class EtherscanService {
         return result;
     }
 
-    async getTokenTransactions(params: { address?: string, contractaddress?: string }): Promise<EtherscanTokenTransactionModel[]> {
+    async getTokenTransactions(params: { network: string, address?: string, contractaddress?: string }): Promise<EtherscanTokenTransactionModel[]> {
         if (!params || (!params.address && !params.contractaddress))
             throw new Error('At least one of \'address\' or \'contractaddress\' must be provided.');
+        if (!params.network)
+            throw new Error('Network must be provided.');
 
         const loadParams = {
             action: 'tokentx',
@@ -50,7 +46,7 @@ export class EtherscanService {
             address: params.address,
             contractaddress: params.contractaddress
         };
-        const result = await this._loadTransactions<EtherscanTokenTransactionModel>(loadParams,
+        const result = await this._loadTransactions<EtherscanTokenTransactionModel>(params.network, loadParams,
             (tx: any, index, array) => {
                 tx.transactionType = EtherscanTransactionType.TokenTransaction;
                 tx.timeStamp = new Date(parseInt(tx.timeStamp) * 1000);
@@ -65,6 +61,7 @@ export class EtherscanService {
     private delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
     private async _loadTransactions<T extends EtherscanTransactionBaseModel>(
+        network: string,
         params: EtherscanTransactionParameters,
         mapFn: (value: T, index: number, array: T[]) => T
     ): Promise<T[]> {
@@ -76,7 +73,7 @@ export class EtherscanService {
 
         while (true) {
             try {
-                const response = await axios.get<EtherscanTransactionResponse<any>>(this.url, {
+                const response = await axios.get<EtherscanTransactionResponse<any>>(this.getApiUrl(network), {
                     params: params
                 });
 
@@ -102,6 +99,17 @@ export class EtherscanService {
         }
 
         return allResults;
+    }
+
+    private getApiUrl(network: string) {
+        if (network === 'eth')
+            return 'https://api.etherscan.io/api';
+        else if (network === 'goerli')
+            return 'https://api-goerli.etherscan.io/api';
+        else if (network === 'sepolia')
+            return 'https://api-sepolia.etherscan.io/api';
+        else
+            throw new Error('Invalid network');
     }
 
 }

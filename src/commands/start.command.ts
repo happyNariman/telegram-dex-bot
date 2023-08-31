@@ -2,11 +2,12 @@ import { Update } from 'typegram';
 import { Markup } from 'telegraf';
 import { BotContext, UserDBModel, UserRole } from '../models/index.js';
 import { UserDBService } from '../services/index.js';
-import { productsKeyboard } from '../keyboards/index.js';
+import { showProductKeyboard } from '../keyboards/index.js';
 
 export async function StartCommand(context: BotContext) {
     if (context.user && context.user.role !== UserRole.New) {
-        context.reply(`Glad to see you again, ${context.user.first_name}!\nWhat would you like to do?`, productsKeyboard);
+        await context.reply(`Glad to see you again, ${context.user.first_name}!`);
+        await showProductKeyboard(context);
         return;
     }
 

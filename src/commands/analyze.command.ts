@@ -66,7 +66,7 @@ function hoursUntilEndOfDayUTC(): number {
 
 
 async function collectData(context: BotContext, walletAddress: string, network: string): Promise<string[][]> {
-    const transactions = await new DexAnalysisService(context.logger).analyzeTransactions(walletAddress);
+    const transactions = await new DexAnalysisService(context.logger).analyzeTransactions(walletAddress, network);
     const data: string[][] = [];
 
     for (const tx of transactions) {

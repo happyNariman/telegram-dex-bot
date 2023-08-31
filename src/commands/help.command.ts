@@ -1,5 +1,5 @@
-import { BotContext } from "@models/index.js";
+import { BotContext } from '@models/index.js';
 
 export function HelpCommand(context: BotContext) {
-    context.reply("Доступные команды:\n/start - начать взаимодействие\n/help - получить справку\n/user - выбрать роль пользователя\n/analyst - выбрать роль аналитика\n/analyze <адрес кошелька> eth - выполнить анализ");
+    context.reply('Available commands:\n/products - show what bot can do\n/analyze <wallet address> eth - get excel file of DEX Transactions');
 }

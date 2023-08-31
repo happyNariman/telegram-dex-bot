@@ -2,7 +2,7 @@ import { Markup, Scenes } from 'telegraf';
 import { callbackQuery, message } from 'telegraf/filters';
 import { ethers } from 'ethers';
 import { BotContext } from '../models/index.js';
-import { networksKeyboardList } from '../keyboards/index.js';
+import { showProductKeyboard, networksKeyboardList } from '../keyboards/index.js';
 import { AnalyzeCommandAndReplyWithDocument } from '../commands/index.js';
 
 interface DEXTransactionsWizardSessionData extends Scenes.WizardSessionData {
@@ -55,6 +55,8 @@ const DEXTransactionsWizard = new Scenes.WizardScene<BotContext>(
         session.address = context.message.text;
 
         await AnalyzeCommandAndReplyWithDocument(context, session.address, session.network);
+
+        await showProductKeyboard(context);
 
         return context.scene.leave();
     }

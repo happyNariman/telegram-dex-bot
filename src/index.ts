@@ -13,6 +13,7 @@ import {
 import { SetRoleAction, StartProductAction } from './actions/index.js';
 import { initFirebase } from './services/db/index.js';
 import { DEXTransactionsWizard } from './wizards/index.js';
+import { showProductKeyboard } from './keyboards/index.js';
 
 initFirebase();
 
@@ -35,6 +36,7 @@ bot.use(stage.middleware());
 // Register commands
 bot.start(StartCommand);
 bot.command('analyze', AnalyzeCommand);
+bot.command('products', context => showProductKeyboard(context));
 bot.help(HelpCommand);
 
 
