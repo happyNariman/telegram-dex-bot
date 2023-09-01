@@ -5,10 +5,10 @@
   "repository": "https://github.com/happyNariman/telegram-dex-bot.git",
   "type": "module",
   "scripts": {
-    "start": "npm run build && npm run run",
-    "run": "node dist/index.js",
+    "start": "node dist/index.js",
     "build": "npx tsc",
-    "dev": "node --trace-warnings --loader ts-node/esm src/index.ts"
+    "dev": "node --trace-warnings --loader ts-node/esm src/index.ts",
+    "postinstall": "tsc"
   },
   "license": "ISC",
   "dependencies": {
