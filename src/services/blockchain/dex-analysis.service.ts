@@ -89,7 +89,7 @@ export class DexAnalysisService {
             if (collectorTransaction.from.length === 0)
                 return;
 
-            this.logger.info('\n\n\n item', { collectorTransaction });
+            //this.logger.info('\n\n\n item', { collectorTransaction });
 
             result.push({
                 hash: collectorTransaction.hash,

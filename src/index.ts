@@ -1,6 +1,7 @@
 import dotenv from 'dotenv';
 dotenv.config();
 
+import express from 'express';
 import { Scenes, Telegraf, session } from 'telegraf';
 import { BotContext } from './models/index.js';
 import { logger } from './core/index.js';
@@ -46,9 +47,18 @@ bot.action(/^product_(.*)$/, StartProductAction);
 
 
 // Start bot
-try {
-    logger.info(`Starting bot... environment: ${process.env.NODE_ENV}`);
-    await bot.launch();
-} catch (error) {
-    logger.error(`Error starting the bot: ${error}`);
-}
+logger.info(`Starting bot... environment: ${process.env.NODE_ENV}`);
+bot.launch()
+    .catch(error => logger.error(`Error starting the bot: ${error}`));
+
+
+// Start http server
+const app = express();
+app.get('/', (req, res) => {
+    res.send('Hello, I\'m <a href="https://t.me/dex_analysis_bot">@dex_analysis_bot</a>!');
+});
+
+const port = process.env.PORT || 3000;
+app.listen(port, () => {
+    console.log(`Server is running on port ${port}`);
+});
