@@ -1,5 +1,5 @@
-import { Update } from 'typegram';
 import { Markup } from 'telegraf';
+import { Update } from 'telegraf/types';
 import { BotContext, UserDBModel, UserRole } from '../models/index.js';
 import { UserDBService } from '../services/index.js';
 import { showProductKeyboard } from '../keyboards/index.js';

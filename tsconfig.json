@@ -1,7 +1,7 @@
 {
   "extends": "./tsconfig.node20.json",
   "compilerOptions": {
-    "module": "esnext",
+    "module": "nodenext",
     "outDir": "./dist",
     "baseUrl": ".",
     "sourceMap": true,

@@ -94,7 +94,7 @@ export class EtherscanService {
             } catch (error) {
                 const message = error instanceof Error ? error.message : error;
                 this.logger.error(`Error etherscan ${params.action}: ${message}`, { error, params });
-                throw new Error('Error etherscan ${params.action}: ' + message);
+                throw new Error(`Error etherscan ${params.action}: ${message}`);
             }
         }
 
